@@ -1,0 +1,120 @@
+
+<div class="p-3 w-100 d-flex gap-3 flex-column">
+
+    <quill-editor *ngIf="!editMode"
+        ngDefaultControl
+        name="viewer"
+        placeholder=""
+        class="quill-viewer w-100"
+        (onEditorCreated)="onEditorCreated($event)"
+        [modules]="viewerModules"
+        [readOnly]="true"
+        [(ngModel)]="content">
+    </quill-editor>
+
+    <div *ngIf="editMode"
+        class="editor d-flex flex-column py-1"
+        [ngClass]="{ 'silent-mode' : silentMode, 'focused' : editorFocused, 'hide-toolbar' : !showFormatting }">
+
+        <quill-editor ngDefaultControl
+            name="fieldName"
+            placeholder=""
+            class="quill-editor w-100"
+            trackChanges="all"
+            [(ngModel)]="content"
+            [modules]="editorModules"
+            (onEditorCreated)="onEditorCreated($event)"
+            (onEditorChanged)="onEditorChanged()"
+            >
+        </quill-editor>
+
+        <div #emojiPicker class="emoji-wrapper" [ngClass]="{ 'visible' : showEmojiPicker }">
+            <emoji-mart
+                set="google"
+                [darkMode]="true"
+                [custom]="emojiCustom"
+                (emojiSelect)="onEmojiSelected($event)"
+                title="Pick your emoji…"
+                emoji="point_up">
+            </emoji-mart>
+        </div>
+
+      <ng-container [ngTemplateOutlet]="bottomToolbar"></ng-container>
+
+    </div>
+
+    <button class="btn btn-primary" (click)="toggle()">Toggle Viewer</button>
+
+</div>
+
+<ng-template #bottomToolbar>
+    <div class="bottom-toolbar d-flex align-items-center px-2 py-1" [ngClass]="{ 'border-top' : showEditorBottomBorder }">
+
+        <button class="btn btn-sm btn-blank"
+            ngbTooltip="Insert deck"
+            container="body"
+            (click)="insertDeck()">
+            <fa-icon [icon]="icon.deck" [fixedWidth]="true"></fa-icon>
+        </button>
+
+        <button class="btn btn-sm btn-blank"
+            ngbTooltip="Insert event information"
+            container="body"
+            (click)="insertEventInfo()">
+            <fa-icon [icon]="icon.event" [fixedWidth]="true"></fa-icon>
+        </button>
+
+        <button class="btn btn-sm btn-blank"
+            #emojiPickerButton
+            ngbTooltip="Emoji"
+            container="body"
+            (mouseenter)="hoverEmoji = true"
+            (mouseleave)="hoverEmoji = false"
+            (click)="showEmojiPicker = !showEmojiPicker">
+            <fa-icon [icon]="hoverEmoji ? icon.emojiHover : icon.emoji" [fixedWidth]="true"></fa-icon>
+        </button>
+
+        <button class="btn btn-sm btn-blank"
+            ngbTooltip="Mention someone"
+            container="body"
+            (click)="mentionSomeone()">
+            <fa-icon [icon]="icon.at" [fixedWidth]="true"></fa-icon>
+        </button>
+
+        <button class="btn btn-sm btn-blank"
+            ngbTooltip="Send a message without showing it to the other members of the message group"
+            container="body"
+            (click)="silentMode = !silentMode"
+            [ngClass]="{ 'selected' : silentMode }">
+            <fa-icon [icon]="icon.silent" [fixedWidth]="true"></fa-icon>
+        </button>
+
+        <button class="btn btn-sm btn-blank"
+          [ngbTooltip]="showFormatting ? 'Hide formatting' : 'Show formatting'"
+          container="body"
+          (click)="showFormatting = !showFormatting"
+          [ngClass]="{ 'selected' : showFormatting }">
+          <fa-icon [icon]="showFormatting ? icon.formatSelected : icon.format" [fixedWidth]="true"></fa-icon>
+        </button>
+
+        <div class="flex-grow-1 spacer"></div>
+
+
+        <ng-template #sendButtonTooltip>
+          <div class="mb-1">Send now</div>
+          <div class="d-flex align-items-center">
+            <span class="text-muted me-1">Press</span>
+            <span class="badge bg-secondary font-monospace">Enter</span>
+          </div>
+        </ng-template>
+        <button class="btn btn-sm px-2 {{ hasMessage ? 'btn-primary' : 'btn-blank' }}"
+          [style.width]="'auto'"
+          [ngbTooltip]="sendButtonTooltip"
+          container="body"
+          (click)="sendMessage()">
+          <div class="me-2" *ngIf="silentMode">🤫 silent mode</div>
+          <fa-icon [icon]="icon.send" [fixedWidth]="true"></fa-icon>
+        </button>
+
+    </div>
+</ng-template>
